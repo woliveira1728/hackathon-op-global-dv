@@ -1,23 +1,64 @@
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import type { NextPage } from 'next';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
 import styles from '../styles/Home.module.css';
+import EthComponent from '../components/EthComponent';
+import Web3 from 'web3';
+import deployedContracts from '../generated/deployedContracts';
+import ProposalCard from '../components/ProposalCard';
+
+interface ContractInstance {
+  methods: {
+    [key: string]: (...args: any[]) => {
+      call: () => Promise<any>;
+    };
+  };
+}
 
 const Home: NextPage = () => {
-  const [candidates, setCandidates] = useState([
-    { id: 1, name: 'Candidato 1', votes: 0, photo:'/img/candidato1.jpg'},
-    { id: 2, name: 'Candidato 2', votes: 0, photo:'/img/candidato2.jpg'}
-  ]);
-  const voteCandidate = (candidateId: number) => {
-    setCandidates(prevCandidates =>
-      prevCandidates.map(candidate =>
-        candidate.id === candidateId ? { ...candidate, votes: candidate.votes + 1 } : candidate
-      )
-    );
-  };
+  const [contractInstance, setContractInstance] = useState<ContractInstance | null>(null);
+  const [voting, setVoting] = useState(null);
+  const [proposals, setProposals] = useState<IProposal[]>([]);
+
+
+  useEffect(() => {
+    try {
+      const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
+
+      const GDVNContract = deployedContracts[31337].filter((x) => x.chainId == "31337")[0].contracts.GDVNProtocol;
+
+      const contractInstance = new web3.eth.Contract(
+        GDVNContract.abi,
+        GDVNContract.address
+      );
+      setContractInstance(contractInstance);
+
+    } catch (error) {
+      console.error(error);
+    }
+  }, []);
+
+  useEffect(() => {
+    async function callSmartContractFunction() {
+      if (contractInstance) {
+        try {
+          const voting = await contractInstance.methods.getVoting(0).call();
+          const proposals = await contractInstance.methods.getProposals(0).call();
+          setVoting(voting);
+          setProposals(proposals);
+          
+          console.log('Result of smart contract function:', proposals[0].voteCount);
+        } catch (error) {
+          console.error('Error calling smart contract function:', error);
+        }
+      }
+    }
+    callSmartContractFunction();
+  }, [contractInstance]);
+  
   return (
     <div className={styles.container}>
       <div className={styles.background}>
@@ -69,15 +110,8 @@ const Home: NextPage = () => {
       <div className={styles.connectButton}><ConnectButton /></div>
       </header>
         <div className={styles.grid}>
-          {candidates.map(candidate => (
-            <div key={candidate.id} className={styles.card}>
-              <Image src={candidate.photo} alt={candidate.name} width={200} height={200} />
-              <div className={styles.details}>
-              <h3 className={styles.h3}>{candidate.name}</h3>
-              <p className={styles.p}>Votos: {candidate.votes}</p>
-              <button className={styles.voteButton} onClick={() => voteCandidate(candidate.id)}>Votar</button>
-            </div>
-            </div>
+          {proposals.map(proposal => (
+            <ProposalCard proposal={proposal} key={proposal.id} />
           ))}
         </div>
         

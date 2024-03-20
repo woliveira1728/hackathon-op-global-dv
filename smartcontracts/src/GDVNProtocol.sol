@@ -28,14 +28,13 @@ contract GDVNProtocol is IErrors{
 
     constructor(address owner) {
         _owner = owner;
-
-        createVoting("Genesis", 0, "");
     }
 
-    function createVoting(string memory title, uint32 deadlineInHours, string memory description) public returns (uint votingIndex) {
+    function createVoting(string memory title, uint32 deadlineInMinutes, string memory description) public returns (uint votingIndex) {
         Voting storage newVoting = _votings.push();
-        uint256 votingDeadlineTimestamp = block.timestamp + deadlineInHours * 60 * 60;
+        uint256 votingDeadlineTimestamp = block.timestamp + deadlineInMinutes * 60;
 
+        newVoting.id = _votings.length - 1;
         newVoting.chairman = msg.sender;
         newVoting.title = title;
         newVoting.deadlineTimestamp = votingDeadlineTimestamp;
@@ -53,6 +52,7 @@ contract GDVNProtocol is IErrors{
         
         Proposal storage newProposal = _votings[votingIndex].proposals.push();
         
+        newProposal.id = _votings[votingIndex].proposals.length - 1;
         newProposal.name = name;
         newProposal.link = link;
         newProposal.voteCount = 0;
@@ -85,6 +85,12 @@ contract GDVNProtocol is IErrors{
 
     function getVoting(uint votingIndex) view external returns (Voting memory voting) {
         return _votings[votingIndex];
+    }
+
+    function getProposals(uint votingIndex) view external returns (Proposal[] memory proposals) {
+        checkVotingIndex(votingIndex);
+
+        return _votings[votingIndex].proposals;
     }
 
     function drawVotingResult(uint votingIndex) external returns (Proposal memory winnerProposal) {

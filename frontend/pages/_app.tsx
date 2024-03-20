@@ -5,6 +5,7 @@ import type { AppProps } from 'next/app';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WagmiProvider } from 'wagmi';
 import {
+  anvil,
   mainnet,
   optimism,
   polygon,
@@ -19,6 +20,7 @@ const config = getDefaultConfig({
     mainnet,
     polygon,
     optimism,
+    anvil,
     ...(process.env.NEXT_PUBLIC_ENABLE_TESTNETS === 'true' ? [sepolia] : []),
   ],
   ssr: true,
