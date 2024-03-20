@@ -60,7 +60,7 @@ contract GDVNProtocol is IErrors{
         return _votings[votingIndex].proposals.length - 1;
     }
 
-    function vote(uint16 votingIndex , uint8 proposalIndex) public {
+    function vote(uint16 votingIndex , uint8 proposalIndex) public returns (uint voteCount) {
         checkVotingIndex(votingIndex);
         
         Voting storage voting = _votings[votingIndex];
@@ -73,16 +73,10 @@ contract GDVNProtocol is IErrors{
 
         voting.proposals[proposalIndex].voteCount += 1;
         _votings[votingIndex] = voting;
+    
+        return _votings[votingIndex].proposals[proposalIndex].voteCount;
     }
-
-    // function getVotingsLength() view external returns (uint votingsLength) {
-    //     if (msg.sender != _owner) {
-    //         revert NotTheOwner();
-    //     }
-
-    //     return _votings.length;
-    // }
-
+    
     function getVoting(uint votingIndex) view external returns (Voting memory voting) {
         return _votings[votingIndex];
     }
