@@ -3,8 +3,8 @@ import type { NextPage } from 'next';
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Chart, registerables } from 'chart.js';
-Chart.register(...registerables);
+// import { Chart, registerables } from 'chart.js';
+// Chart.register(...registerables);
 import styles from '../styles/Home.module.css';
 
 interface Candidate {
@@ -22,8 +22,9 @@ interface Proposal {
 
 const Home: NextPage = () => {
   const [activeTab, setActiveTab] = useState('tab1');
+  const [ isWalletConnected, setIsWalletConnected] = useState(false);
 
-  const handleTabClick = (tab) => {
+  const handleTabClick = (tab: string) => {
     setActiveTab(tab);
   };
 
@@ -39,11 +40,13 @@ const Home: NextPage = () => {
   ]);
 
   const voteCandidate = (candidateId: number) => {
-    setCandidates(prevCandidates =>
+    console.log('teste');
+    setCandidates(prevCandidates => 
+      
       prevCandidates.map(candidate =>
         candidate.id === candidateId ? { ...candidate, votes: candidate.votes + 1 } : candidate
       )
-    );
+      ); 
   };
 
   const voteProposal = (proposalId: number) => {
@@ -71,78 +74,205 @@ const Home: NextPage = () => {
           <text x="0" y="15" fill="white" font-size="20" font-family="Arial">Global DVN</text>
         </svg>
       </div>
-      <main className={styles.main}>
-        <nav className={styles.menu}>
-          <ul>
-            <li>
-              <Link href="/">What</Link>
-            </li>
-            <li>
-              <Link href="/roadmap">Roadmap</Link>
-            </li>
-            <li>
-              <Link href="/teams">Teams</Link>
-            </li>
-            <li>
-              <Link href="/partners">Partners</Link>
-            </li>
-          </ul>
-        </nav>
-        <header>
-          <div className={styles.connectButton}><ConnectButton /></div>
-        </header>
-        <div>
-      <div className={styles.tabs}>
-        <button
-          className={styles.tabs === 'tab1' ? 'active' : ''}
-          onClick={() => handleTabClick('tab1')}
-        >
-          <h1 className={styles.title}>Votação Eleitoral</h1>
-        </button>
-        <button className={styles.tabs === 'tab2' ? 'active' : ''}
-          onClick={() => handleTabClick('tab2')}>
-          <h1 className={styles.title}>Enquete</h1>
-        </button>
-      </div>
-      <div className={styles.content}>
-        {activeTab === 'tab1' && <div>
-        <section className={styles.category}>
-          <div className={styles.grid}>
-            {candidates.map(candidate => (
-              <div key={candidate.id} className={styles.card}>
-                <Image src={candidate.photo} alt={candidate.name} width={200} height={200} />
-                <div className={styles.details}>
-                  <p className={styles.p}>Nome: {candidate.name}</p>
-                  <p className={styles.p}>Votos: {candidate.votes}  <button className={styles.voteButton} onClick={() => voteCandidate(candidate.id)}>Votar</button></p> 
+      <header>
+        <div className={styles.connectButton}>
+          <ConnectButton.Custom>
+            {({
+              account,
+              chain,
+              openAccountModal,
+              openChainModal,
+              openConnectModal,
+              authenticationStatus,
+              mounted,
+            }) => {
+              // Note: If your app doesn't use authentication, you
+              // can remove all 'authenticationStatus' checks
+              const ready = mounted && authenticationStatus !== 'loading';
+              const connected =
+                ready &&
+                account &&
+                chain &&
+                (!authenticationStatus ||
+                  authenticationStatus === 'authenticated');
+
+              if(connected) {
+                setIsWalletConnected(true);
+              } else {
+                setIsWalletConnected(false);
+              }
+
+              return (
+                <div
+                  {...(!ready && {
+                    'aria-hidden': true,
+                    'style': {
+                      opacity: 0,
+                      pointerEvents: 'none',
+                      userSelect: 'none',
+                    },
+                  })}
+                >
+                  {(() => {
+                    if (!connected) {
+                      return (
+                        <button onClick={openConnectModal} type="button">
+                          Connect Wallet
+                        </button>
+                      );
+                    }
+
+                    if (chain.unsupported) {
+                      return (
+                        <button onClick={openChainModal} type="button">
+                          Wrong network
+                        </button>
+                      );
+                    }
+
+                    return (
+                      <div style={{ display: 'flex', gap: 12 }}>
+                        <button
+                          onClick={openChainModal}
+                          style={{ display: 'flex', alignItems: 'center' }}
+                          type="button"
+                        >
+                          {chain.hasIcon && (
+                            <div
+                              style={{
+                                background: chain.iconBackground,
+                                width: 12,
+                                height: 12,
+                                borderRadius: 999,
+                                overflow: 'hidden',
+                                marginRight: 4,
+                              }}
+                            >
+                              {chain.iconUrl && (
+                                <img
+                                  alt={chain.name ?? 'Chain icon'}
+                                  src={chain.iconUrl}
+                                  style={{ width: 12, height: 12 }}
+                                />
+                              )}
+                            </div>
+                          )}
+                          {chain.name}
+                        </button>
+
+                        <button onClick={openAccountModal} type="button">
+                          {account.displayName}
+                          {account.displayBalance
+                            ? ` (${account.displayBalance})`
+                            : ''}
+                        </button>
+                      </div>
+                    );
+                  })()}
                 </div>
-              </div>
-            ))}
+              );
+            }}
+          </ConnectButton.Custom>
+        </div>
+      </header>
+
+      {isWalletConnected ?
+        <main className={styles.main}>
+          <nav className={styles.menu}>
+            <ul>
+              <li>
+                <Link href="/">What</Link>
+              </li>
+              <li>
+                <Link href="/roadmap">Roadmap</Link>
+              </li>
+              <li>
+                <Link href="/teams">Teams</Link>
+              </li>
+              <li>
+                <Link href="/partners">Partners</Link>
+              </li>
+            </ul>
+          </nav>
+          <div>
+          <div className={styles.tabs}>
+            <button
+              className={styles.tabs === 'tab1' ? 'active' : ''}
+              onClick={() => handleTabClick('tab1')}
+            >
+              <h1 className={styles.title}>Votação Eleitoral</h1>
+            </button>
+            <button className={styles.tabs === 'tab2' ? 'active' : ''}
+              onClick={() => handleTabClick('tab2')}>
+              <h1 className={styles.title}>Enquete</h1>
+            </button>
           </div>
-        </section>
-        </div>}
-        {activeTab === 'tab2' && <div>
-        <section className={styles.category}>
-          <div className={styles.grid}>
-          {proposals.map(proposal => (
-            <div key={proposal.id} className={styles.card}>
-              <div className={styles.proposal}>
-                <h3 className={styles.title}>{proposal.title}</h3>
-                <p className={styles.p}>{proposal.description}</p>
-                <div className={styles.progressContainer}>
-                  <div className={styles.progressBar} style={{ width: `${(proposal.id * 20)}%` }}>
-                    {proposal.id * 20}%
+          <div className={styles.content}>
+            {activeTab === 'tab1' && <div>
+            <section className={styles.category}>
+              <div className={styles.grid}>
+                {candidates.map(candidate => (
+                  <div key={candidate.id} className={styles.card}>
+                    <Image src={candidate.photo} alt={candidate.name} width={200} height={200} />
+                    <div className={styles.details}>
+                      <p className={styles.p}>Nome: {candidate.name}</p>
+                      <p className={styles.p}>Votos: {candidate.votes}</p> 
+                      <button className={styles.voteButton} onClick={() => voteCandidate(candidate.id)}>Votar</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+            </div>}
+            {activeTab === 'tab2' && <div>
+            <section className={styles.category}>
+              <div className={styles.grid}>
+              {proposals.map(proposal => (
+                <div key={proposal.id} className={styles.card}>
+                  <div className={styles.proposal}>
+                    <h3 className={styles.title}>{proposal.title}</h3>
+                    <p className={styles.p}>{proposal.description}</p>
+                    <div className={styles.progressContainer}>
+                      <div className={styles.progressBar} style={{ width: `${(proposal.id * 20)}%` }}>
+                        {proposal.id * 20}%
+                      </div>
+                    </div>
+                    <button className={styles.voteButton} onClick={() => voteProposal(proposal.id)}>Votar</button>
                   </div>
                 </div>
-                <button className={styles.voteButton} onClick={() => voteProposal(proposal.id)}>Votar</button>
+              ))}
               </div>
-            </div>
-          ))}
+            </section>
+            </div>}
           </div>
-        </section>
-        </div>}
-      </div>
-    </div>
-      </main>
+        </div>
+        </main>
+        :
+        <main className={styles.main}>
+          <nav className={styles.menu}>
+            <ul>
+              <li>
+                <Link href="/">What</Link>
+              </li>
+              <li>
+                <Link href="/roadmap">Roadmap</Link>
+              </li>
+              <li>
+                <Link href="/teams">Teams</Link>
+              </li>
+              <li>
+                <Link href="/partners">Partners</Link>
+              </li>
+            </ul>
+          </nav>  
+          <div>  
+            <section className={styles.isNotWalletContainer}>
+              <h2>Connect your wallet to access voting options</h2>
+            </section>
+          </div>
+        </main>
+      }
+
       <footer className={styles.footer}>
         <a href="" rel="" target="_blank">
           Global DVN ©
