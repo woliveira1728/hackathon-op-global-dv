@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import { IErrors } from "./IErrors.sol";
+import {IErrors} from "./IErrors.sol";
 
-contract GDVNProtocol is IErrors{
+contract GDVNProtocol is IErrors {
     struct Voting {
         uint256 id;
         address chairman;
@@ -16,15 +16,16 @@ contract GDVNProtocol is IErrors{
 
     struct Proposal {
         uint256 id;
-        string name;   
+        string name;
         string link;
-        uint voteCount; 
+        uint voteCount;
     }
 
     address public _owner;
     Voting[] _votings;
 
-    mapping(address => mapping(uint256 votingIndex => bool alreadyVoted)) public _votes;
+    mapping(address => mapping(uint256 votingIndex => bool alreadyVoted))
+        public _votes;
 
     constructor(address owner) {
         _owner = owner;
@@ -32,10 +33,16 @@ contract GDVNProtocol is IErrors{
         createVoting("Genesis", 0, "");
     }
 
-    function createVoting(string memory title, uint32 deadlineInHours, string memory description) public returns (uint votingIndex) {
+    function createVoting(
+        string memory title,
+        uint32 deadlineInHours,
+        string memory description
+    ) public returns (uint votingIndex) {
         Voting storage newVoting = _votings.push();
-        uint256 votingDeadlineTimestamp = block.timestamp + deadlineInHours * 60 * 60;
-
+        uint256 votingDeadlineTimestamp = block.timestamp +
+            deadlineInHours *
+            60 *
+            60;
         newVoting.chairman = msg.sender;
         newVoting.title = title;
         newVoting.deadlineTimestamp = votingDeadlineTimestamp;
@@ -44,15 +51,19 @@ contract GDVNProtocol is IErrors{
         return _votings.length - 1;
     }
 
-    function addProposal(uint votingIndex, string memory name, string memory link) public returns (uint proposalIndex) {
+    function addProposal(
+        uint votingIndex,
+        string memory name,
+        string memory link
+    )
+        public
+        onlyChairman(_votings[votingIndex].chairman)
+        returns (uint proposalIndex)
+    {
         checkVotingIndex(votingIndex);
 
-        if (msg.sender != _votings[votingIndex].chairman) {
-            revert NotTheVotingChairman();
-        }
-        
         Proposal storage newProposal = _votings[votingIndex].proposals.push();
-        
+
         newProposal.name = name;
         newProposal.link = link;
         newProposal.voteCount = 0;
@@ -60,9 +71,9 @@ contract GDVNProtocol is IErrors{
         return _votings[votingIndex].proposals.length - 1;
     }
 
-    function vote(uint16 votingIndex , uint8 proposalIndex) public {
+    function vote(uint16 votingIndex, uint8 proposalIndex) public {
         checkVotingIndex(votingIndex);
-        
+
         Voting storage voting = _votings[votingIndex];
 
         checkProposalIndex(voting, proposalIndex);
@@ -75,35 +86,43 @@ contract GDVNProtocol is IErrors{
         _votings[votingIndex] = voting;
     }
 
-    // function getVotingsLength() view external returns (uint votingsLength) {
-    //     if (msg.sender != _owner) {
-    //         revert NotTheOwner();
-    //     }
-
+    // function getVotingsLength() view external onlyOwner(_owner) returns (uint votingsLength) {
     //     return _votings.length;
     // }
 
-    function getVoting(uint votingIndex) view external returns (Voting memory voting) {
+    function getVoting(
+        uint votingIndex
+    ) external view returns (Voting memory voting) {
         return _votings[votingIndex];
     }
 
-    function drawVotingResult(uint votingIndex) external returns (Proposal memory winnerProposal) {
+    function drawVotingResult(
+        uint votingIndex
+    ) external returns (Proposal memory winnerProposal) {
         checkVotingIndex(votingIndex);
 
-        Voting storage voting = _votings[votingIndex]; 
+        Voting storage voting = _votings[votingIndex];
 
         if (block.timestamp < voting.deadlineTimestamp) {
-            revert DeadlineNotReached(voting.deadlineTimestamp - block.timestamp);
+            revert DeadlineNotReached(
+                voting.deadlineTimestamp - block.timestamp
+            );
         }
 
         uint winnerProposalIndex = 0;
         bool isTied = false;
         for (uint i = 0; i < voting.proposals.length; i++) {
-            if (voting.proposals[i].voteCount > voting.proposals[winnerProposalIndex].voteCount) {
+            if (
+                voting.proposals[i].voteCount >
+                voting.proposals[winnerProposalIndex].voteCount
+            ) {
                 winnerProposalIndex = i;
                 isTied = false;
-            }
-            else if (voting.proposals[i].voteCount == voting.proposals[winnerProposalIndex].voteCount && i != 0) {
+            } else if (
+                voting.proposals[i].voteCount ==
+                voting.proposals[winnerProposalIndex].voteCount &&
+                i != 0
+            ) {
                 isTied = true;
             }
         }
@@ -117,16 +136,29 @@ contract GDVNProtocol is IErrors{
 
         return voting.winner;
     }
-    
-    function checkVotingIndex(uint votingIndex) view internal {
+
+    function checkVotingIndex(uint votingIndex) internal view {
         if (votingIndex >= _votings.length || votingIndex < 0) {
             revert IndexOutOfRange(votingIndex);
         }
     }
 
-    function checkProposalIndex(Voting memory voting, uint proposalIndex) pure internal{
+    function checkProposalIndex(
+        Voting memory voting,
+        uint proposalIndex
+    ) internal pure {
         if (proposalIndex >= voting.proposals.length || proposalIndex < 0) {
             revert IndexOutOfRange(proposalIndex);
         }
     }
+
+    modifier onlyChairman(address _chairmanCheck) {
+        require(msg.sender == _chairmanCheck, "On chairman have access");
+        _;
+    }
+
+    // modifier onlyOwner() {
+    //     require(msg.sender == _owner, "On owner have access");
+    //     _;
+    // }
 }
