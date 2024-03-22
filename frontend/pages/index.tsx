@@ -3,8 +3,6 @@ import type { NextPage } from 'next';
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-// import { Chart, registerables } from 'chart.js';
-// Chart.register(...registerables);
 import styles from '../styles/Home.module.css';
 
 interface Candidate {
@@ -29,14 +27,14 @@ const Home: NextPage = () => {
   };
 
   const [candidates, setCandidates] = useState<Candidate[]>([
-    { id: 1, name: 'Candidato 1', votes: 0, photo:'/img/candidato1.jpg'},
-    { id: 2, name: 'Candidato 2', votes: 0, photo:'/img/candidato2.jpg'}
+    { id: 1, name: 'Candidate 1', votes: 0, photo:'/img/candidato1.jpg'},
+    { id: 2, name: 'Candidate 2', votes: 0, photo:'/img/candidato2.jpg'}
   ]);
 
   const [proposals] = useState<Proposal[]>([
-    { id: 1, title: 'Título da Proposta 1', description: 'Descrição da Proposta 1' },
-    { id: 2, title: 'Título da Proposta 2', description: 'Descrição da Proposta 2' },
-    { id: 3, title: 'Título da Proposta 3', description: 'Descrição da Proposta 3' }
+    {id: 1, title: 'Proposal Title 1', description: 'Proposal Description 1'},
+    {id: 2, title: 'Proposal Title 2', description: 'Proposal Description 2'},
+    {id: 3, title: 'Proposal Title 3', description: 'Proposal Description 3'}
   ]);
 
   const voteCandidate = (candidateId: number) => {
@@ -181,7 +179,10 @@ const Home: NextPage = () => {
           <nav className={styles.menu}>
             <ul>
               <li>
-                <Link href="/">What</Link>
+                <Link href="/">Home</Link>
+              </li>
+              <li>
+                <Link href="/whats">Whats</Link>
               </li>
               <li>
                 <Link href="/roadmap">Roadmap</Link>
@@ -200,12 +201,12 @@ const Home: NextPage = () => {
               className={styles.tabs === 'tab1' ? 'active' : ''}
               onClick={() => handleTabClick('tab1')}
             >
-              <h1 className={styles.title}>Votação Eleitoral</h1>
+              <h1 className={styles.titletab}>Electoral Voting</h1>
             </button>
             <button className={styles.tabs === 'tab2' ? 'active' : ''}
               onClick={() => handleTabClick('tab2')}>
-              <h1 className={styles.title}>Enquete</h1>
-            </button>
+              <h1 className={styles.titletab}>Poll</h1>
+            </button> <span className={styles.title_voting}>  Select the voting category</span>
           </div>
           <div className={styles.content}>
             {activeTab === 'tab1' && <div>
@@ -215,9 +216,9 @@ const Home: NextPage = () => {
                   <div key={candidate.id} className={styles.card}>
                     <Image src={candidate.photo} alt={candidate.name} width={200} height={200} />
                     <div className={styles.details}>
-                      <p className={styles.p}>Nome: {candidate.name}</p>
-                      <p className={styles.p}>Votos: {candidate.votes}</p> 
-                      <button className={styles.voteButton} onClick={() => voteCandidate(candidate.id)}>Votar</button>
+                      <p className={styles.p}>Name: {candidate.name}</p>
+                      <p className={styles.p}>Votes: {candidate.votes}</p> 
+                      <button className={styles.voteButton} onClick={() => voteCandidate(candidate.id)}>vote</button>
                     </div>
                   </div>
                 ))}
@@ -237,7 +238,7 @@ const Home: NextPage = () => {
                         {proposal.id * 20}%
                       </div>
                     </div>
-                    <button className={styles.voteButton} onClick={() => voteProposal(proposal.id)}>Votar</button>
+                    <button className={styles.voteButton} onClick={() => voteProposal(proposal.id)}>vote</button>
                   </div>
                 </div>
               ))}
@@ -252,7 +253,10 @@ const Home: NextPage = () => {
           <nav className={styles.menu}>
             <ul>
               <li>
-                <Link href="/">What</Link>
+                <Link href="/">Home</Link>
+              </li>
+              <li>
+                <Link href="/whats">Whats</Link>
               </li>
               <li>
                 <Link href="/roadmap">Roadmap</Link>
@@ -272,9 +276,8 @@ const Home: NextPage = () => {
           </div>
         </main>
       }
-
       <footer className={styles.footer}>
-        <a href="" rel="" target="_blank">
+        <a>
           Global DVN ©
         </a>
       </footer>
