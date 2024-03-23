@@ -63,7 +63,7 @@ const Teams: NextPage = () => {
               <Link href="/roadmap">Roadmap</Link>
             </li>
             <li>
-              <Link href="/teams">Teams</Link>
+              <Link href="/teams">Team</Link>
             </li>
             <li>
               <Link href="/partners">Partners</Link>
@@ -87,7 +87,7 @@ const Teams: NextPage = () => {
             </div>
             <div className={styles.card}>
             <h3 className={styles.title}>Wilson Oliveira</h3>
-                <p className={styles.p}>Debug and features</p>
+                <p className={styles.p}>FullStack Developer, Debug and features</p>
                 <center><button className={styles.tabs}><a href="https://www.linkedin.com/in/woliveira1728">Linkedin</a></button></center>
             </div>
             </center>

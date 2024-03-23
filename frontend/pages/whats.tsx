@@ -63,7 +63,7 @@ const Whats: NextPage = () => {
               <Link href="/roadmap">Roadmap</Link>
             </li>
             <li>
-              <Link href="/teams">Teams</Link>
+              <Link href="/teams">Team</Link>
             </li>
             <li>
               <Link href="/partners">Partners</Link>
