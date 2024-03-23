@@ -27,8 +27,8 @@ const Home: NextPage = () => {
   };
 
   const [candidates, setCandidates] = useState<Candidate[]>([
-    { id: 1, name: 'Candidate 1', votes: 0, photo:'/img/candidato1.jpg'},
-    { id: 2, name: 'Candidate 2', votes: 0, photo:'/img/candidato2.jpg'}
+    { id: 1, name: 'Trump', votes: 0, photo:'/img/candidato1.jpg'},
+    { id: 2, name: 'Biden', votes: 0, photo:'/img/candidato2.jpg'}
   ]);
 
   const [proposals] = useState<Proposal[]>([
