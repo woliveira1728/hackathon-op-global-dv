@@ -15,6 +15,12 @@ contract Local is Script {
         address payable contractOwner = payable(vm.envAddress("PA_OWNER"));
 
         GDVN = new GDVNProtocol(contractOwner);
+
+        GDVN.createVoting("Eleicao - Estados Unidos da America", 1, "");
+        GDVN.addProposal(0, "Trump", "");
+        GDVN.addProposal(0, "Biden", "");
+
+
         console2.log("GDVNProtocol address: ", address(GDVN));
 
         vm.stopBroadcast();
