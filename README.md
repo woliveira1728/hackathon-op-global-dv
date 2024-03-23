@@ -11,7 +11,7 @@ A GDVN é uma solução descentralizada na forma de uma plataforma para criar e 
 - Execute o arquivo `docker-compose.yml`:
 
 ```
-docker compose up -d
+docker compose up --build -d
 ```
 
 - Após o comando finalizar, acesse localmente em *http://localhost:3000/*.
