@@ -4,6 +4,7 @@
 /node_modules
 /.pnp
 .pnp.js
+yarn.lock
 
 # testing
 /coverage
@@ -39,3 +40,4 @@ yarn-error.log*
 
 # deploy update
 deployedContracts.ts
+/generated/build-info
